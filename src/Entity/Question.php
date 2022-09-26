@@ -2,11 +2,16 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\Types;
 use App\DoctrineType\StatusType;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+// use Doctrine\Common\Collections\Collection;
 use App\Repository\QuestionRepository;
 use Doctrine\Common\Collections\Collection;
+use phpDocumentor\Reflection\Types\String_;
+use Doctrine\Common\Annotations\Annotation\Enum;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -20,26 +25,28 @@ class Question
     private int $id;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank]
     private string $title;
 
     #[ORM\Column]
     private bool $promoted;
 
-    #[ORM\Column(type: StatusType::NAME, length: 9)]
-    private string $status;
+    #[ORM\Column(type: StatusType::NAME, length: 255)]
+    #[Enum()]
+    private $status;
 
-    #[ORM\OneToMany(mappedBy: 'question', targetEntity: Answer::class)]
+    #[ORM\OneToMany(mappedBy: 'question', targetEntity: Answer::class, cascade:["persist"])]
     private Collection $answers;
 
     public function __construct()
     {
-        $this->answers = new Collection();
+        $this->answers = new ArrayCollection();
     }
 
     /**
      * Get the value of id
      */ 
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
@@ -49,7 +56,7 @@ class Question
      *
      * @return  self
      */ 
-    public function setId($id)
+    public function setId($id): self
     {
         $this->id = $id;
 
@@ -116,13 +123,18 @@ class Question
         return $this;
     }
     /**
-     * @return Collection<int, Answer>
+     * @return ArrayCollection<int, Answer>
      */
-    public function getAnswers(): Collection
+    public function getAnswers(): ArrayCollection
     {
         return $this->answers;
     }
 
+    /**
+     * @param Answer $answer
+     * 
+     * @return self
+     */
     public function addAnswer(Answer $answer): self
     {
         if (!$this->answers->contains($answer)) {
@@ -133,6 +145,11 @@ class Question
         return $this;
     }
 
+    /**
+     * @param Answer $answer
+     * 
+     * @return self
+     */
     public function removeAnswer(Answer $answer): self
     {
         if ($this->answers->removeElement($answer)) {

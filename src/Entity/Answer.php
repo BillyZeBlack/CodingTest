@@ -8,6 +8,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\AnswerRepository;
 use App\DoctrineType\ChannelType;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: AnswerRepository::class)]
 #[ApiResource]
@@ -25,8 +26,8 @@ class Answer
     #[ORM\JoinColumn(nullable: false)]
     private Question $question;
 
-    #[ORM\Column(type: ChannelType::NAME, length: 3)]
-    private string $channel;
+    #[ORM\Column(type: ChannelType::NAME, length: 255)]
+    private $channel;
 
     /**
      * Get the value of id
